@@ -3,7 +3,7 @@ resources:
 - name: attendee-service
   type: git
   source:
-    uri: https://github.com/YOUR_GITHUB_USER_NAME/pcf-attendee-service-code  #<---- REPLACE ME
+    uri: https://github.com/ArunS111/pcf-attendee-service-code  #<---- REPLACE ME
     branch: master
 
 - name: deploy-attendee
@@ -33,7 +33,7 @@ jobs:
     passed: [test]
   - task: package
     file: attendee-service/ci/tasks/package.yml
-  - put: deploy-attendee-service
+  - put: deploy-attendee
     params:
       manifest: attendee-service/manifest.yml
       path: package-output/attendee-service.jar

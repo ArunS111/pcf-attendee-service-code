@@ -2,6 +2,7 @@
 
 set -ex
 
+
 pushd attendee-service
   echo "Fetching Dependencies"
   ./mvnw clean compile > /dev/null
