@@ -3,24 +3,34 @@ resources:
 - name: attendee-service
   type: git
   source:
-    uri: https://github.com/YOUR_GITHUB_USER_NAME/pcf-attendee-service-code   #<----- REPLACE ME
-    branch: concourse_deployment
+    uri: https://github.com/YOUR_GITHUB_USER_NAME/pcf-attendee-service-code  #<---- REPLACE ME
+    branch: master
 
-- name: deploy-attendee-service
+- name: deploy-attendee
   type: cf
   source:
-    api: YOUR_PCF_API_ENDPOINT        #<----- REPLACE ME
+    api: https://api.system.cumuluslabs.io/        #<---- REPLACE ME
     username: {{cf-user}}
     password: {{cf-password}}
-    organization: YOUR_CI_USER_ORG    #<----- REPLACE ME
-    space: YOUR_CI_USER_SPACE         #<----- REPLACE ME
+    organization: sarun-PAL-JUL2    #<---- REPLACE ME
+    space: sandbox         #<---- REPLACE ME
     skip_cert_check: true
 
 jobs:
-- name: build
+- name: test
   public: true
   plan:
   - get: attendee-service
+    trigger: true
+  - task: test
+    file: attendee-service/ci/tasks/test.yml
+
+- name: deploy
+  public: true
+  plan:
+  - get: attendee-service
+    trigger: true
+    passed: [test]
   - task: package
     file: attendee-service/ci/tasks/package.yml
   - put: deploy-attendee-service
@@ -28,3 +38,13 @@ jobs:
       manifest: attendee-service/manifest.yml
       path: package-output/attendee-service.jar
 
+- name: smoke_test
+  public: true
+  plan:
+  - get: attendee-service
+    trigger: true
+    passed: [deploy]
+  - task: smoke_test
+    file: attendee-service/ci/tasks/smoke-test.yml
+    params:
+      ATTENDEE_SERVICE_URL: https://chatty-grysbok.apps.cumuluslabs.io/  #<---- REPLACE ME
